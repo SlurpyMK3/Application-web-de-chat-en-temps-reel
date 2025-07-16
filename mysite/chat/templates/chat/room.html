@@ -5,12 +5,29 @@
     <meta charset="utf-8"/>
     <title>Chat Room</title>
 </head>
+
 <body>
+    {% if request.user.is_authenticated %}
+    <h>Bonjour {{ user.username }}</h>
+    <form action="{% url 'deconnexion' %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Déconnexion</button>
+    </form>
+    {% endif %}
+
+    <form action="{% url 'index' %}" method="get" style="display:inline;">
+    <button type="submit">Changez de room</button>
+    </form>
+    <h1>Vous êtes dans la room: {{ room_name }}</h2>
     <textarea id="chat-log" cols="100" rows="20"></textarea><br>
+
+    {% if request.user.is_authenticated %}
     <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Send">
+    <input id="chat-message-submit" type="button" value="Envoyer">
     {{ room_name|json_script:"room-name" }}
+
     <script>
+        const username = "{{ user.username }}"; // Ajout du nom d'utilisateur
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
 
         const chatSocket = new WebSocket(
@@ -23,13 +40,14 @@
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
+            // Affiche le nom d'utilisateur devant le message
+            document.querySelector('#chat-log').value += (data.username + " : " + data.message + '\n');
         };
 
         chatSocket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
         };
-
+        
         document.querySelector('#chat-message-input').focus();
         document.querySelector('#chat-message-input').onkeyup = function(e) {
             if (e.key === 'Enter') {  // enter, return
@@ -41,10 +59,17 @@
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
-                'message': message
+                'message': message,
+                'username': username // Envoi du nom d'utilisateur
             }));
             messageInputDom.value = '';
         };
     </script>
+    {% else %}
+
+    <h2>Veuillez vous connecter pour participer au chat</h2>
+    <p>Pour envoyer un message, vous devez être connecté.</p>
+    <p><a href="{% url 'connexion' %}">Se connecter</a> 
+    {% endif %}
 </body>
 </html>
