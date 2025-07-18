@@ -1,3 +1,5 @@
+{% extends "home.html" %}
+
 {% block content %}
 <div class="w-full max-w-md mx-auto p-6 bg-white border border-gray-200 rounded-lg shadow-lg mt-20">
   <form class="space-y-6" method="post" action="{% url 'connexion' %}">
@@ -33,6 +35,7 @@
     <button type="submit" class="w-full px-6 py-3 text-lg font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">
       Connexion
     </button>
+
     <div class="text-sm font-medium text-gray-500 text-center">
       Pas encore inscrit ? <a href="{% url 'inscription' %}" class="text-blue-600 hover:underline">Créer votre compte</a>
     </div>

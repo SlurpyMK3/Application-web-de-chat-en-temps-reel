@@ -1,75 +1,85 @@
-<!-- chat/templates/chat/room.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <title>Chat Room</title>
-</head>
+{% extends "home.html" %}
+{% load static %}
 
-<body>
-    {% if request.user.is_authenticated %}
-    <h>Bonjour {{ user.username }}</h>
-    <form action="{% url 'deconnexion' %}" method="post" style="display:inline;">
-        {% csrf_token %}
-        <button type="submit">Déconnexion</button>
-    </form>
-    {% endif %}
+{% block content %}
+<div class="w-full max-w-3xl mx-auto mt-16 p-6 bg-white border border-gray-200 rounded-lg shadow-lg">
 
-    <form action="{% url 'index' %}" method="get" style="display:inline;">
-    <button type="submit">Changez de room</button>
-    </form>
-    <h1>Vous êtes dans la room: {{ room_name }}</h2>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
+  {% if request.user.is_authenticated %}
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-semibold text-gray-800">Bonjour {{ user.username }}</h2>
+      <div class="flex space-x-2">
 
-    {% if request.user.is_authenticated %}
-    <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Envoyer">
+        <form action="{% url 'home' %}" method="get">
+          <button type="submit" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+            Changer de room
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <h3 class="text-lg text-gray-700 mb-4">Vous êtes dans la room : <span class="font-semibold">{{ room_name }}</span></h3>
+
+    <textarea id="chat-log"
+              class="w-full h-64 p-3 border border-gray-300 rounded-md mb-4 resize-none bg-gray-50"
+              readonly></textarea>
+
+    <div class="flex space-x-2">
+      <input id="chat-message-input"
+             type="text"
+             placeholder="Tapez votre message..."
+             class="flex-1 p-3 border border-gray-300 rounded-md focus:outline-none ">
+      <button id="chat-message-submit"
+              class="px-6 py-3 bg-blue-600 text-white font-semibold ">
+        Envoyer
+      </button>
+    </div>
+
     {{ room_name|json_script:"room-name" }}
 
     <script>
-        const username = "{{ user.username }}"; // Ajout du nom d'utilisateur
-        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+      const username = "{{ user.username }}";
+      const roomName = JSON.parse(document.getElementById('room-name').textContent);
 
-        const chatSocket = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/chat/'
-            + roomName
-            + '/'
-        );
+      const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+      );
 
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            // Affiche le nom d'utilisateur devant le message
-            document.querySelector('#chat-log').value += (data.username + " : " + data.message + '\n');
-        };
+      chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        document.querySelector('#chat-log').value += (data.username + " : " + data.message + '\n');
+      };
 
-        chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly');
-        };
-        
-        document.querySelector('#chat-message-input').focus();
-        document.querySelector('#chat-message-input').onkeyup = function(e) {
-            if (e.key === 'Enter') {  // enter, return
-                document.querySelector('#chat-message-submit').click();
-            }
-        };
+      chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+      };
 
-        document.querySelector('#chat-message-submit').onclick = function(e) {
-            const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'message': message,
-                'username': username // Envoi du nom d'utilisateur
-            }));
-            messageInputDom.value = '';
-        };
+      const inputField = document.querySelector('#chat-message-input');
+      inputField.focus();
+
+      inputField.onkeyup = function(e) {
+        if (e.key === 'Enter') {
+          document.querySelector('#chat-message-submit').click();
+        }
+      };
+
+      document.querySelector('#chat-message-submit').onclick = function(e) {
+        const message = inputField.value;
+        if (message.trim() !== "") {
+          chatSocket.send(JSON.stringify({
+            'message': message,
+            'username': username
+          }));
+          inputField.value = '';
+        }
+      };
     </script>
-    {% else %}
 
-    <h2>Veuillez vous connecter pour participer au chat</h2>
-    <p>Pour envoyer un message, vous devez être connecté.</p>
-    <p><a href="{% url 'connexion' %}">Se connecter</a> 
-    {% endif %}
-</body>
-</html>
+  {% else %}
+    <div class="text-center">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Veuillez vous connecter pour participer au chat</h2>
+      <p class="text-gray-600 mb-2">Pour voir ou envoyer un message, vous devez être connecté.</p>
+      <a href="{% url 'connexion' %}" class="text-blue-600 hover:underline">Se connecter</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

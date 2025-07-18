@@ -1,0 +1,48 @@
+{% extends "home.html" %}
+
+{% block content %}
+<div class="w-full max-w-md mx-auto p-6 bg-white border border-gray-200 rounded-lg shadow-lg mt-20">
+  <h2 class="text-2xl font-semibold text-gray-900 mb-6 text-center">Entrer dans une Chat Room</h2>
+  
+  <div class="space-y-4">
+    <label for="room-name-input" class="block text-base font-medium text-gray-700">
+      Nom de la Room
+    </label>
+    <input
+      id="room-name-input"
+      type="text"
+      placeholder="ex: general, musique, dev..."
+      class="w-full p-3 border border-gray-300 rounded-md focus:outline-none 0"
+    />
+
+    <button
+      id="room-name-submit"
+      class="w-full px-6 py-3 text-lg font-semibold text-white"
+    >
+      Entrer
+    </button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const input = document.querySelector('#room-name-input');
+    const button = document.querySelector('#room-name-submit');
+
+    input.focus();
+
+    input.addEventListener('keyup', function (e) {
+      if (e.key === 'Enter') {
+        button.click();
+      }
+    });
+
+    button.addEventListener('click', function () {
+      const roomName = input.value.trim();
+      if (roomName) {
+        window.location.pathname = '/chat/' + encodeURIComponent(roomName) + '/';
+      }
+    });
+  });
+</script>
+{% endblock %}

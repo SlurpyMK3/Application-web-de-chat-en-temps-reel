@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    command: ["./entrypoint.sh", "daphne", "-b", "0.0.0.0", "-p", "8000", "mysite.asgi:application"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./static:/app/static  
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db:5432/postgres
+      - REDIS_URL=redis://redis:6379/0
+    working_dir: /app/mysite
+
+volumes:
+  postgres_data:

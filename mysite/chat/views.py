@@ -1,10 +1,15 @@
-from django.shortcuts import render,  redirect
+from django.shortcuts import get_object_or_404, render,  redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from .form import CustomUserCreationForm
 
-def index(request):
-    return render(request, "chat/index.html")
+def contact_view(request):
+    return render(request, 'contact.html')
+def home(request):
+    return render(request, "home.html")
+
+def chat(request):
+    return render(request, "chat/chat.html")
 
 def room(request, room_name):
     return render(request, "chat/room.html", {"room_name": room_name})
@@ -26,11 +31,11 @@ def connexion(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('index')  
+            return redirect('/')  
         else:
             messages.error(request, 'Nom d\'utilisateur ou mot de passe incorrect.')
     return render(request, 'login/connexion.html')
 
 def deconnexion(request):
     logout(request)
-    return redirect('connexion')
+    return redirect('/')
