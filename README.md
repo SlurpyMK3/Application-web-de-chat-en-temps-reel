@@ -47,7 +47,7 @@ Ouvre ton navigateur et va sur :
 Variables d’environnement dans `docker-compose.yml` :
 
 ```yaml
-DATABASE_URL=postgres://postgres:667442@db:5432/postgres
+DATABASE_URL=postgres://postgres:password@db:5432/postgres
 REDIS_URL=redis://redis:6379/0
 ```
 
